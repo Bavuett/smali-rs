@@ -23,6 +23,12 @@
 // zero-copy, and later on we can also return `&'a str` slices of the
 // source (e.g. the text of a token) without allocating anything.
 
+use crate::{
+    error::LexError,
+    span::Span,
+    token::{Token, TokenKind},
+};
+
 pub struct Lexer<'a> {
     src: &'a str,
     pos: usize,
@@ -34,7 +40,7 @@ impl<'a> Lexer<'a> {
     }
 
     // Look at the current character without going forward.
-    pub fn peek(&self) -> Option<char> {
+    fn peek(&self) -> Option<char> {
         self.src[self.pos..].chars().next()
     }
 
@@ -43,14 +49,14 @@ impl<'a> Lexer<'a> {
     // By using `?` on `peek()`, if it returns None() (reached EOF) we can quit the function
     // early without incrementing `pos` and returing None() without explicitly checking EOF and
     // implicitly returning said value.
-    pub fn bump(&mut self) -> Option<char> {
+    fn bump(&mut self) -> Option<char> {
         let character: char = self.peek()?;
         self.pos += character.len_utf8();
 
         Some(character)
     }
 
-    pub fn skip_whitespace(&mut self) -> () {
+    fn skip_whitespace(&mut self) -> () {
         while let Some(character) = self.peek() {
             if character.is_whitespace() {
                 // We encountered a space, tab, etc. so we need to bump the counter to the next character.
@@ -60,5 +66,36 @@ impl<'a> Lexer<'a> {
                 return;
             }
         }
+    }
+
+    pub fn next_token(&mut self) -> Result<Token, LexError> {
+        self.skip_whitespace();
+
+        let start: usize = self.pos;
+
+        let character: Option<char> = self.bump();
+
+        let end: usize = self.pos;
+
+        let token: Token = match character {
+            Some(character) => match character {
+                '.' => Token {
+                    kind: TokenKind::Directive,
+                    span: Span { start, end },
+                },
+                _ => {
+                    return Err(LexError {
+                        message: format!("Unexpcted character: {}", character),
+                        span: Span { start, end },
+                    });
+                }
+            },
+            None => Token {
+                kind: TokenKind::EndOfFile,
+                span: Span { start, end },
+            },
+        };
+
+        Ok(token)
     }
 }

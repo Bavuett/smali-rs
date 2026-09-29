@@ -120,6 +120,16 @@ impl<'a> Lexer<'a> {
 
                 Ok(token)
             }
+            Some(character) if character.is_ascii_digit() => {
+                self.eat_while(|character| character.is_ascii_digit());
+                let end: usize = self.pos;
+                let token = Token {
+                    kind: TokenKind::Number,
+                    span: Span { start, end },
+                };
+
+                Ok(token)
+            }
             None => {
                 let end: usize = self.pos;
 

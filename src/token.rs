@@ -9,6 +9,7 @@ pub enum TokenKind {
     Register,        // v0, p1
     ClassDescriptor, // Ljava/lang/Object;
     Comment,         // # comments
+    Number,          // 123, 45.67
     EndOfFile,       // EOF
 }
 

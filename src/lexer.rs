@@ -44,6 +44,16 @@ impl<'a> Lexer<'a> {
         self.src[self.pos..].chars().next()
     }
 
+    fn eat_while(&mut self, predicate: impl Fn(char) -> bool) {
+        while let Some(character) = self.peek() {
+            if !predicate(character) {
+                break;
+            }
+
+            self.bump();
+        }
+    }
+
     // Look at the current character by `peek()`ing it. Then, bump up the position by looking
     // at the size in bytes of the utf_8 character. Some may be 1 bytes long, some 2, etc.
     // By using `?` on `peek()`, if it returns None() (reached EOF) we can quit the function
@@ -57,15 +67,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_whitespace(&mut self) -> () {
-        while let Some(character) = self.peek() {
-            if character.is_whitespace() {
-                // We encountered a space, tab, etc. so we need to bump the counter to the next character.
-                self.bump();
-            } else {
-                // This is not a whitespace, so we get out of the function.
-                return;
-            }
-        }
+        self.eat_while(|character| character.is_whitespace())
     }
 
     pub fn next_token(&mut self) -> Result<Token, LexError> {
@@ -75,13 +77,9 @@ impl<'a> Lexer<'a> {
 
         let token_result: Result<Token, LexError> = match self.bump() {
             Some('.') => {
-                while let Some(character) = self.peek() {
-                    if character.is_whitespace() {
-                        break;
-                    }
-
-                    self.bump();
-                }
+                // The '.' has alreasy been consumed by the match arm above.
+                // Now we need to eat the rest of the directive.
+                self.eat_while(|character| character == '-' || character.is_ascii_alphabetic());
 
                 let end: usize = self.pos;
 
@@ -112,10 +110,9 @@ impl<'a> Lexer<'a> {
             }
         };
 
-        let token = match token_result {
-            Ok(token) => token,
-            Err(err) => return Err(err),
-        };
+        // No need to use the match expression because we already have a `Result` that
+        // we can use with `?` to propagate errors.
+        let token = token_result?;
 
         Ok(token)
     }

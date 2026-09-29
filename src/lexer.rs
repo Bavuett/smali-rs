@@ -73,27 +73,48 @@ impl<'a> Lexer<'a> {
 
         let start: usize = self.pos;
 
-        let character: Option<char> = self.bump();
+        let token_result: Result<Token, LexError> = match self.bump() {
+            Some('.') => {
+                while let Some(character) = self.peek() {
+                    if character.is_whitespace() {
+                        break;
+                    }
 
-        let end: usize = self.pos;
+                    self.bump();
+                }
 
-        let token: Token = match character {
-            Some(character) => match character {
-                '.' => Token {
+                let end: usize = self.pos;
+
+                let token = Token {
                     kind: TokenKind::Directive,
                     span: Span { start, end },
-                },
-                _ => {
-                    return Err(LexError {
-                        message: format!("Unexpected character: {}", character),
-                        span: Span { start, end },
-                    });
-                }
-            },
-            None => Token {
-                kind: TokenKind::EndOfFile,
-                span: Span { start, end },
-            },
+                };
+
+                Ok(token)
+            }
+            None => {
+                let end: usize = self.pos;
+
+                let token = Token {
+                    kind: TokenKind::EndOfFile,
+                    span: Span { start, end },
+                };
+
+                Ok(token)
+            }
+            _ => {
+                let end: usize = self.pos;
+
+                Err(LexError {
+                    message: "".to_string(),
+                    span: Span { start, end },
+                })
+            }
+        };
+
+        let token = match token_result {
+            Ok(token) => token,
+            Err(err) => return Err(err),
         };
 
         Ok(token)

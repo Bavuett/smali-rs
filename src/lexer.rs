@@ -110,6 +110,16 @@ impl<'a> Lexer<'a> {
 
                 Ok(token)
             }
+            Some(character) if character == '#' => {
+                self.eat_while(|character| character != '\n');
+                let end: usize = self.pos;
+                let token = Token {
+                    kind: TokenKind::Comment,
+                    span: Span { start, end },
+                };
+
+                Ok(token)
+            }
             None => {
                 let end: usize = self.pos;
 

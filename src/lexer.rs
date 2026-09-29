@@ -106,7 +106,7 @@ impl<'a> Lexer<'a> {
                 let end: usize = self.pos;
 
                 Err(LexError {
-                    message: "".to_string(),
+                    message: "Character not handled".to_string(),
                     span: Span { start, end },
                 })
             }

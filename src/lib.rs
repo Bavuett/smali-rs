@@ -1,7 +1,7 @@
-mod error;
-mod lexer;
-mod span;
-mod token;
+pub mod error;
+pub mod lexer;
+pub mod span;
+pub mod token;
 
 #[cfg(test)]
 mod tests {

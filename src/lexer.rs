@@ -85,7 +85,7 @@ impl<'a> Lexer<'a> {
                 },
                 _ => {
                     return Err(LexError {
-                        message: format!("Unexpcted character: {}", character),
+                        message: format!("Unexpected character: {}", character),
                         span: Span { start, end },
                     });
                 }

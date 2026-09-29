@@ -1,5 +1,8 @@
+use std::fmt::{Debug, Display, Formatter};
+
 use crate::span::Span;
 
+#[derive(Debug)]
 pub enum TokenKind {
     Directive,       // .class, .method, .end
     Identifier,      // add-int, public, names
@@ -8,6 +11,7 @@ pub enum TokenKind {
     EndOfFile,       // EOF
 }
 
+#[derive(Debug)]
 pub struct Token {
     pub kind: TokenKind,
     pub span: Span,

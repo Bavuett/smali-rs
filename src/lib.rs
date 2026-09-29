@@ -36,6 +36,6 @@ mod tests {
             Err(err) => panic!("{}", err),
         };
 
-        println!("{:?}", token)
+        assert_eq!(token.kind, token::TokenKind::Directive)
     }
 }

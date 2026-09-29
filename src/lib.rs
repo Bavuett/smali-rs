@@ -95,4 +95,67 @@ mod tests {
         assert_eq!(token.kind, token::TokenKind::Directive);
         assert_eq!(token.span, span::Span { start: 4, end: 10 });
     }
+
+    #[test]
+    fn tokenize() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/super.smali");
+
+        let smali_file: File = match File::open(path) {
+            Ok(result) => result,
+            Err(err) => panic!("{}", err),
+        };
+
+        let mut buffer: BufReader<File> = BufReader::new(smali_file);
+        let mut file_as_string: String = String::new();
+
+        _ = match buffer.read_to_string(&mut file_as_string) {
+            Ok(_) => {}
+            Err(err) => panic!("{}", err),
+        };
+
+        let mut lexer: lexer::Lexer<'_> = lexer::Lexer::new(&file_as_string);
+        let tokens: Vec<token::Token> = match lexer.tokenize() {
+            Ok(result) => result,
+            Err(err) => panic!("{}", err),
+        };
+
+        assert_eq!(tokens[0].kind, token::TokenKind::Directive);
+        assert_eq!(tokens[0].span, span::Span { start: 4, end: 10 });
+
+        assert_eq!(tokens[1].kind, token::TokenKind::EndOfFile);
+        assert_eq!(tokens[1].span, span::Span { start: 12, end: 12 });
+        assert_eq!(tokens.len(), 2);
+    }
+
+    #[test]
+    fn class() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/class.smali");
+        let smali_file: File = match File::open(path) {
+            Ok(result) => result,
+            Err(err) => panic!("{}", err),
+        };
+
+        let mut buffer: BufReader<File> = BufReader::new(smali_file);
+        let mut file_as_string: String = String::new();
+        _ = match buffer.read_to_string(&mut file_as_string) {
+            Ok(_) => {}
+            Err(err) => panic!("{}", err),
+        };
+
+        let mut lexer: lexer::Lexer<'_> = lexer::Lexer::new(&file_as_string);
+        let tokens: Vec<token::Token> = match lexer.tokenize() {
+            Ok(result) => result,
+            Err(err) => panic!("{}", err),
+        };
+
+        assert_eq!(tokens[0].kind, token::TokenKind::Directive);
+        assert_eq!(tokens[0].span, span::Span { start: 0, end: 6 });
+
+        assert_eq!(tokens[1].kind, token::TokenKind::Identifier);
+        assert_eq!(tokens[1].span, span::Span { start: 7, end: 13 });
+
+        assert_eq!(tokens[2].kind, token::TokenKind::EndOfFile);
+        assert_eq!(tokens[2].span, span::Span { start: 15, end: 15 });
+        assert_eq!(tokens.len(), 3);
+    }
 }

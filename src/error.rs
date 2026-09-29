@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use crate::span::Span;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct LexError {
     pub message: String,
     pub span: Span,

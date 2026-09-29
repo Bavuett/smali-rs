@@ -90,6 +90,26 @@ impl<'a> Lexer<'a> {
 
                 Ok(token)
             }
+            // Check is the character an ASCII alphabetic character. If so, it's an identifier.
+            // Consume the rest of the identifier and return it as a token.
+            // The first character must be an alphabetic character, followed by alphanumeric characters or underscores.
+            Some(character) if character.is_ascii_alphabetic() => {
+                self.eat_while(|character| {
+                    character.is_ascii_alphanumeric()
+                        || character == '-'
+                        || character == '_'
+                        || character == '/'
+                });
+
+                let end: usize = self.pos;
+
+                let token = Token {
+                    kind: TokenKind::Identifier,
+                    span: Span { start, end },
+                };
+
+                Ok(token)
+            }
             None => {
                 let end: usize = self.pos;
 
@@ -115,5 +135,20 @@ impl<'a> Lexer<'a> {
         let token = token_result?;
 
         Ok(token)
+    }
+
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, LexError> {
+        let mut tokens: Vec<Token> = Vec::new();
+
+        loop {
+            let token = self.next_token()?;
+            tokens.push(token);
+
+            if token.kind == TokenKind::EndOfFile {
+                break;
+            }
+        }
+
+        Ok(tokens)
     }
 }

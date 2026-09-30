@@ -82,3 +82,50 @@ impl<'a> Parser<'a> {
         Ok(Register { span, number })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::span::Span;
+
+    #[test]
+    fn parse_class() {
+        // .class public Lcom/example/MyClass;
+        let src = ".class public Lcom/example/MyClass;";
+        let mut parser = Parser::new(src).expect("Failed to create parser");
+        let class = parser.parse_class().expect("Failed to parse class");
+
+        // span of the directive ".class"
+        assert_eq!(class.span, Span { start: 0, end: 6 });
+
+        // access modifier "public"
+        assert_eq!(class.access.span, Span { start: 7, end: 13 });
+        assert_eq!(class.access.name, "public");
+
+        // class descriptor "Lcom/example/MyClass;"
+        assert_eq!(class.name.span, Span { start: 14, end: 35 });
+        assert_eq!(class.name.name, "Lcom/example/MyClass;");
+    }
+
+    #[test]
+    fn parse_register() {
+        // v0
+        let src = "v0";
+        let mut parser = Parser::new(src).expect("Failed to create parser");
+        let register = parser.parse_register().expect("Failed to parse register");
+
+        assert_eq!(register.span, Span { start: 0, end: 2 });
+        assert_eq!(register.number, 0);
+    }
+
+    #[test]
+    fn parse_register_double_digit() {
+        // v12
+        let src = "v12";
+        let mut parser = Parser::new(src).expect("Failed to create parser");
+        let register = parser.parse_register().expect("Failed to parse register");
+
+        assert_eq!(register.span, Span { start: 0, end: 3 });
+        assert_eq!(register.number, 12);
+    }
+}

@@ -20,5 +20,5 @@ pub struct ClassDeclaration<'a> {
 
 pub struct Register {
     pub span: span::Span,
-    pub number: uize,
+    pub number: usize,
 }

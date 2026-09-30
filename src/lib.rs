@@ -1,5 +1,7 @@
+pub mod ast;
 pub mod error;
 pub mod lexer;
+pub mod parser;
 pub mod span;
 pub mod token;
 
@@ -42,7 +44,7 @@ mod tests {
 
     #[test]
     fn empty_file() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/empty.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/empty.smali");
 
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
@@ -70,7 +72,7 @@ mod tests {
 
     #[test]
     fn super_smali() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/super.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/super.smali");
 
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
@@ -98,7 +100,7 @@ mod tests {
 
     #[test]
     fn tokenize() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/super.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/super.smali");
 
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
@@ -129,7 +131,7 @@ mod tests {
 
     #[test]
     fn class() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/class.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/class.smali");
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
             Err(err) => panic!("{}", err),
@@ -161,7 +163,7 @@ mod tests {
 
     #[test]
     fn comments() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/comments.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/comments.smali");
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
             Err(err) => panic!("{}", err),
@@ -196,7 +198,7 @@ mod tests {
 
     #[test]
     fn tokenize_class_descriptor() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/class_descriptor.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/class_descriptor.smali");
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
             Err(err) => panic!("{}", err),
@@ -231,7 +233,7 @@ mod tests {
 
     #[test]
     fn tokenize_register() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/register.smali");
+        let path: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/register.smali");
         let smali_file: File = match File::open(path) {
             Ok(result) => result,
             Err(err) => panic!("{}", err),

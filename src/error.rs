@@ -1,11 +1,27 @@
 use std::fmt::{Display, Formatter};
 
-use crate::span::Span;
+use crate::{span::Span, token::TokenKind};
 
 #[derive(Debug, PartialEq)]
 pub struct LexError {
     pub message: String,
     pub span: Span,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum ParseError {
+    Lex(LexError),
+    Unexpected {
+        expected: TokenKind,
+        got: TokenKind,
+        span: Span,
+    },
+}
+
+impl From<LexError> for ParseError {
+    fn from(err: LexError) -> Self {
+        ParseError::Lex(err)
+    }
 }
 
 // NOTE: how `Display`, `fmt`, `Formatter` and `write!` work together.

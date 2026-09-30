@@ -92,10 +92,14 @@ impl<'a> Lexer<'a> {
             }
             Some('L') => {
                 self.eat_while(|character| {
-                    character == '-' || character == '_' && character == '/'
+                    character == '-' || character == '_' || character == '/'
                 });
 
                 let kind = if self.peek() == Some(';') {
+                    // Consume the token before assigning the ClassDescriptor as its kind: otherwise
+                    // the next read will have ';' again and we will be stuck in a loop that gets us
+                    // a LexError because it doesn't have any matching arm in this function.
+                    self.bump();
                     TokenKind::ClassDescriptor
                 } else {
                     TokenKind::Identifier

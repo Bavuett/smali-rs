@@ -13,6 +13,18 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+    fn new(src: &'a str) -> Result<Self, LexError> {
+        let mut lexer: Lexer<'_> = Lexer::new(src);
+
+        let current: Token = lexer.next_token()?;
+
+        Ok(Self {
+            src,
+            lexer,
+            current,
+        })
+    }
+
     fn bump(&mut self) -> Result<Token, LexError> {
         let previous = self.current;
         self.current = self.lexer.next_token()?;

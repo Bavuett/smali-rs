@@ -92,7 +92,10 @@ impl<'a> Lexer<'a> {
             }
             Some('L') => {
                 self.eat_while(|character| {
-                    character == '-' || character == '_' || character == '/'
+                    character.is_ascii_alphanumeric()
+                        || character == '-'
+                        || character == '_'
+                        || character == '/'
                 });
 
                 let kind = if self.peek() == Some(';') {
@@ -123,7 +126,7 @@ impl<'a> Lexer<'a> {
                     }
                 } =>
             {
-                self.eat_while(|character| character.is_ascii_digit()); 
+                self.eat_while(|character| character.is_ascii_digit());
                 let end = self.pos;
 
                 let token = Token {

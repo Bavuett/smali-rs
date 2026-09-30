@@ -101,10 +101,19 @@ impl<'a> Lexer<'a> {
                         || character == '/'
                 });
 
+                // If the character is 'L' and the next character is ';', it's a class descriptor.
+                // Otherwise, it's an identifier.
+                let kind = if character == 'L' && self.peek() == Some(';') {
+                    self.bump();
+                    TokenKind::ClassDescriptor
+                } else {
+                    TokenKind::Identifier
+                };
+
                 let end: usize = self.pos;
 
                 let token = Token {
-                    kind: TokenKind::Identifier,
+                    kind,
                     span: Span { start, end },
                 };
 

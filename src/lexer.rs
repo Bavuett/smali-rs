@@ -76,6 +76,15 @@ impl<'a> Lexer<'a> {
         let start: usize = self.pos;
 
         let token_result: Result<Token, LexError> = match self.bump() {
+            Some(',') => {
+                let end: usize = self.pos;
+
+                let token = Token {
+                    kind: TokenKind::Comma,
+                    span: Span { start, end },
+                };
+                Ok(token)
+            }
             Some('.') => {
                 // The '.' has alreasy been consumed by the match arm above.
                 // Now we need to eat the rest of the directive.

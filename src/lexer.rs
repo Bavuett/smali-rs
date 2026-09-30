@@ -90,6 +90,24 @@ impl<'a> Lexer<'a> {
 
                 Ok(token)
             }
+            Some(character)
+                if (character == 'v' || character == 'p') && {
+                    if let Some(next_char) = self.peek() {
+                        next_char.is_ascii_digit()
+                    } else {
+                        false
+                    }
+                } =>
+            {
+                let end = self.pos;
+
+                let token = Token {
+                    kind: TokenKind::Register,
+                    span: Span { start, end },
+                };
+
+                Ok(token)
+            }
             // Check is the character an ASCII alphabetic character. If so, it's an identifier.
             // Consume the rest of the identifier and return it as a token.
             // The first character must be an alphabetic character, followed by alphanumeric characters or underscores.

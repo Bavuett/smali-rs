@@ -165,6 +165,21 @@ impl<'a> Parser<'a> {
                     Instruction::ReturnVoid { span: opcode_token.span }
                 )
             },
+            "add-int" => {
+                let destination: Register = self.parse_register()?;
+                let operand1: Register = self.parse_register()?;
+                let operand2: Register = self.parse_register()?;
+                let total_span: Span = Span { start: opcode_token.span.start, end: operand2.span.end };
+
+                Ok(
+                    Instruction::AddInt {
+                        destination,
+                        operand1,
+                        operand2,
+                        span: total_span
+                    }
+                )
+            },
             "return-object" => {
                 // We need to read a register.
                 let register = self.parse_register()?;

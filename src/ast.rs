@@ -33,14 +33,23 @@ pub struct MethodDeclaration<'a> {
 }
 
 pub enum Instruction<'a> {
+    AddInt {
+        destination: Register,
+        operand1: Register,
+        operand2: Register,
+        span: Span,
+    },
     ReturnObject {
         register: Register,
         span: Span,
-    }
+    },
     ReturnVoid {
-        span: Span
-    }
-    Raw { span: span::Span, text: &'a str },
+        span: Span,
+    },
+    Raw {
+        span: span::Span,
+        text: &'a str,
+    },
 }
 
 pub struct Register {

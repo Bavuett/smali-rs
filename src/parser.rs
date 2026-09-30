@@ -182,14 +182,23 @@ impl<'a> Parser<'a> {
             },
             "return-object" => {
                 // We need to read a register.
-                let register = self.parse_register()?;
-                let total_span = Span { start: opcode_token.span.start, end: register.span.end };
+                let register: Register = self.parse_register()?;
+                let total_span: Span = Span { start: opcode_token.span.start, end: register.span.end };
 
                 Ok(Instruction::ReturnObject {
                     register,
                     span: total_span
                 })
             },
+            "return" => {
+                let register: Register = self.parse_register()?;
+                let total_span: Span = Span { start: opcode_token.span.start, end: register.span.end };
+
+                Ok(Instruction::Return {
+                    register,
+                    span: total_span
+                })
+            }
             _ => {
                 Ok(Instruction::Raw {
                     span: opcode_token.span,

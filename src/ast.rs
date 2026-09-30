@@ -39,6 +39,10 @@ pub enum Instruction<'a> {
         operand2: Register,
         span: Span,
     },
+    Return {
+        register: Register,
+        span: Span,
+    },
     ReturnObject {
         register: Register,
         span: Span,

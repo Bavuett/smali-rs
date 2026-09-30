@@ -44,16 +44,6 @@ impl<'a> Lexer<'a> {
         self.src[self.pos..].chars().next()
     }
 
-    fn eat_while(&mut self, predicate: impl Fn(char) -> bool) {
-        while let Some(character) = self.peek() {
-            if !predicate(character) {
-                break;
-            }
-
-            self.bump();
-        }
-    }
-
     // Look at the current character by `peek()`ing it. Then, bump up the position by looking
     // at the size in bytes of the utf_8 character. Some may be 1 bytes long, some 2, etc.
     // By using `?` on `peek()`, if it returns None() (reached EOF) we can quit the function
@@ -68,6 +58,16 @@ impl<'a> Lexer<'a> {
 
     fn skip_whitespace(&mut self) -> () {
         self.eat_while(|character| character.is_whitespace())
+    }
+
+    fn eat_while(&mut self, predicate: impl Fn(char) -> bool) {
+        while let Some(character) = self.peek() {
+            if !predicate(character) {
+                break;
+            }
+
+            self.bump();
+        }
     }
 
     pub fn next_token(&mut self) -> Result<Token, LexError> {

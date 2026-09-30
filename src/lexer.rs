@@ -123,6 +123,7 @@ impl<'a> Lexer<'a> {
                     }
                 } =>
             {
+                self.eat_while(|character| character.is_ascii_digit()); 
                 let end = self.pos;
 
                 let token = Token {

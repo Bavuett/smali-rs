@@ -135,7 +135,7 @@ impl<'a> Parser<'a> {
                 }
             }
 
-            let instruction: Instruction<'_> = self.parse_insruction()?;
+            let instruction: Instruction<'_> = self.parse_instruction()?;
             instructions.push(instruction);
         }
 
@@ -148,8 +148,14 @@ impl<'a> Parser<'a> {
             access_modifiers,
             span: Span {
                 start: start_span,
+<<<<<<< HEAD
                 end: 0,
             },
+=======
+                end: end_span,
+            },
+            instructions,
+>>>>>>> 804a27c1255e521a08137e6b8277c4009746d6d0
         };
 
         Ok(method_declaration)
@@ -214,8 +220,8 @@ impl<'a> Parser<'a> {
     fn parse_super(&mut self) -> Result<ClassDescriptor<'a>, ParseError> {
         self.expect(TokenKind::Directive)?;
 
-        let name_token = self.expect(TokenKind::ClassDescriptor)?;
-        let name = ClassDescriptor {
+        let name_token: Token = self.expect(TokenKind::ClassDescriptor)?;
+        let name: ClassDescriptor<'_> = ClassDescriptor {
             span: name_token.span,
             name: &self.src[name_token.span.start..name_token.span.end],
         };

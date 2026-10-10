@@ -214,8 +214,8 @@ impl<'a> Parser<'a> {
     fn parse_super(&mut self) -> Result<ClassDescriptor<'a>, ParseError> {
         self.expect(TokenKind::Directive)?;
 
-        let name_token = self.expect(TokenKind::ClassDescriptor)?;
-        let name = ClassDescriptor {
+        let name_token: Token = self.expect(TokenKind::ClassDescriptor)?;
+        let name: ClassDescriptor<'_> = ClassDescriptor {
             span: name_token.span,
             name: &self.src[name_token.span.start..name_token.span.end],
         };

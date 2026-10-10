@@ -18,7 +18,7 @@ pub struct ClassDescriptor<'a> {
 
 pub struct ClassDeclaration<'a> {
     pub span: span::Span,
-    pub access: Identifier<'a>,
+    pub access_modifier: Identifier<'a>,
     pub name: ClassDescriptor<'a>,
     // We need a box because, without it, the size of ClassDeclaration would be infinite. Instead, by putting
     // it in the heap by storing it inside a Box.

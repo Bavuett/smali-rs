@@ -1,5 +1,12 @@
 use crate::{
-    ast::{ClassDeclaration, ClassDescriptor, Identifier, Instruction, MethodDeclaration, Register, SmaliFile}, error::{LexError, ParseError}, lexer::Lexer, span::Span, token::{Token, TokenKind},
+    ast::{
+        ClassDeclaration, ClassDescriptor, Identifier, Instruction, MethodDeclaration, Register,
+        SmaliFile,
+    },
+    error::{LexError, ParseError},
+    lexer::Lexer,
+    span::Span,
+    token::{Token, TokenKind},
 };
 
 pub struct Parser<'a> {
@@ -46,10 +53,10 @@ impl<'a> Parser<'a> {
         let directive: Token = self.expect(TokenKind::Directive)?;
         let span: Span = directive.span;
 
-        let access_token: Token = self.expect(TokenKind::Identifier)?;
-        let access: Identifier<'_> = Identifier {
-            span: access_token.span,
-            name: &self.src[access_token.span.start..access_token.span.end],
+        let access_modifier_token: Token = self.expect(TokenKind::Identifier)?;
+        let access_modifier: Identifier<'_> = Identifier {
+            span: access_modifier_token.span,
+            name: &self.src[access_modifier_token.span.start..access_modifier_token.span.end],
         };
         let name_token: Token = self.expect(TokenKind::ClassDescriptor)?;
         let name: ClassDescriptor<'_> = ClassDescriptor {
@@ -59,7 +66,7 @@ impl<'a> Parser<'a> {
 
         Ok(ClassDeclaration {
             span,
-            access,
+            access_modifier,
             name,
             super_class: None,
         })
@@ -71,7 +78,7 @@ impl<'a> Parser<'a> {
 
         let mut access_modifiers: Vec<Identifier<'a>> = Vec::new();
 
-        let valid_modifiers = [
+        let valid_modifiers: [&str; 6] = [
             "public",
             "private",
             "protected",
@@ -116,7 +123,7 @@ impl<'a> Parser<'a> {
                     // Smali ends its methods by using `.end method`: after consuming `.end`, we need to consume `method`.
                     // We save the Token to get its span.
                     let end_word: Token = self.expect(TokenKind::Identifier)?;
-                        end_span = end_word.span.end;
+                    end_span = end_word.span.end;
 
                     // We found the end: we may exit the loop.
                     break;
@@ -130,16 +137,6 @@ impl<'a> Parser<'a> {
 
             let instruction: Instruction<'_> = self.parse_insruction()?;
             instructions.push(instruction);
-
-            let method_declaration: MethodDeclaration<'a> = MethodDeclaration {
-                name: Identifier {
-                    span: method_name_span,
-                    name: &self.src[method_name_span.start..method_name_span.end],
-                    },
-                access_modifiers,
-                span: Span { start: start_span, end: end_span},
-                instructions,
-            };
         }
 
         let method_declaration: MethodDeclaration<'a> = MethodDeclaration {
@@ -147,64 +144,70 @@ impl<'a> Parser<'a> {
                 span: method_name_span,
                 name: &self.src[method_name_span.start..method_name_span.end],
             },
+            instructions,
             access_modifiers,
             span: Span {
                 start: start_span,
-                end: 0
-            }
-        }
+                end: 0,
+            },
+        };
+
+        Ok(method_declaration)
     }
 
-    fn parse_insruction(&mut self) -> Result<Instruction<'a>, ParseError> {
+    fn parse_instruction(&mut self) -> Result<Instruction<'a>, ParseError> {
         let opcode_token: Token = self.expect(TokenKind::Identifier)?;
         let opcode_text: &str = &self.src[opcode_token.span.start..opcode_token.span.end];
 
         match opcode_text {
-            "return-void" => {
-                Ok(
-                    Instruction::ReturnVoid { span: opcode_token.span }
-                )
-            },
+            "return-void" => Ok(Instruction::ReturnVoid {
+                span: opcode_token.span,
+            }),
             "add-int" => {
                 let destination: Register = self.parse_register()?;
                 let operand1: Register = self.parse_register()?;
                 let operand2: Register = self.parse_register()?;
-                let total_span: Span = Span { start: opcode_token.span.start, end: operand2.span.end };
+                let total_span: Span = Span {
+                    start: opcode_token.span.start,
+                    end: operand2.span.end,
+                };
 
-                Ok(
-                    Instruction::AddInt {
-                        destination,
-                        operand1,
-                        operand2,
-                        span: total_span
-                    }
-                )
-            },
+                Ok(Instruction::AddInt {
+                    destination,
+                    operand1,
+                    operand2,
+                    span: total_span,
+                })
+            }
             "return-object" => {
                 // We need to read a register.
                 let register: Register = self.parse_register()?;
-                let total_span: Span = Span { start: opcode_token.span.start, end: register.span.end };
+                let total_span: Span = Span {
+                    start: opcode_token.span.start,
+                    end: register.span.end,
+                };
 
                 Ok(Instruction::ReturnObject {
                     register,
-                    span: total_span
+                    span: total_span,
                 })
-            },
+            }
             "return" => {
                 let register: Register = self.parse_register()?;
-                let total_span: Span = Span { start: opcode_token.span.start, end: register.span.end };
+                let total_span: Span = Span {
+                    start: opcode_token.span.start,
+                    end: register.span.end,
+                };
 
                 Ok(Instruction::Return {
                     register,
-                    span: total_span
+                    span: total_span,
                 })
             }
-            _ => {
-                Ok(Instruction::Raw {
-                    span: opcode_token.span,
-                    text: opcode_text
-                })
-            }
+            _ => Ok(Instruction::Raw {
+                span: opcode_token.span,
+                text: opcode_text,
+            }),
         }
     }
 
@@ -239,7 +242,6 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse(&mut self) -> Result<SmaliFile<'a>, ParseError> {
-        let mut smali_file: Option<SmaliFile<'a>>;
         let mut class: Option<ClassDeclaration> = None;
 
         while self.current.kind != TokenKind::EndOfFile {
@@ -268,7 +270,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        let class = match class {
+        let class: ClassDeclaration<'_> = match class {
             Some(class) => class,
             None => {
                 return Err(ParseError::Unexpected {

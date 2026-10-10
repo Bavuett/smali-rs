@@ -144,18 +144,12 @@ impl<'a> Parser<'a> {
                 span: method_name_span,
                 name: &self.src[method_name_span.start..method_name_span.end],
             },
-            instructions,
             access_modifiers,
             span: Span {
                 start: start_span,
-<<<<<<< HEAD
-                end: 0,
-            },
-=======
                 end: end_span,
             },
             instructions,
->>>>>>> 804a27c1255e521a08137e6b8277c4009746d6d0
         };
 
         Ok(method_declaration)

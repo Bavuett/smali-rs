@@ -246,7 +246,7 @@ impl<'a> Parser<'a> {
 
         while self.current.kind != TokenKind::EndOfFile {
             // Let's look at the token's text to dinguistish the various directives.
-            let text = &self.src[self.current.span.start..self.current.span.end];
+            let text: &str = &self.src[self.current.span.start..self.current.span.end];
 
             match text {
                 ".class" => {
@@ -255,8 +255,13 @@ impl<'a> Parser<'a> {
                 ".super" => {
                     let super_descriptor: ClassDescriptor = self.parse_super()?;
 
-                    if let Some(class_descriptor) = &mut class {
-                        class_descriptor.super_class = Some(super_descriptor);
+                    if let Some(class_declaration) = &mut class {
+                        class_declaration.super_class = Some(super_descriptor);
+                    } else {
+                        // `.super` found before `.class`, file is malformed.
+                        return Err(ParseError::SuperBeforeClass {
+                            span: self.current.span,
+                        });
                     }
                 }
                 ".method" => {}

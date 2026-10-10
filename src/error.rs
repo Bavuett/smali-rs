@@ -16,6 +16,9 @@ pub enum ParseError {
         got: TokenKind,
         span: Span,
     },
+    SuperBeforeClass {
+        span: Span,
+    },
 }
 
 impl From<LexError> for ParseError {

@@ -19,7 +19,7 @@ pub enum ParseError {
     UnclosedMethod {
         span: Span,
     },
-    SuperBeforeClass {
+    DirectiveBeforeClass {
         span: Span,
     },
 }

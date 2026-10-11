@@ -20,6 +20,7 @@ pub struct ClassDeclaration<'a> {
     pub span: span::Span,
     pub access_modifier: Identifier<'a>,
     pub name: ClassDescriptor<'a>,
+    pub methods: Vec<MethodDeclaration<'a>>,
     pub super_class: Option<ClassDescriptor<'a>>,
 }
 

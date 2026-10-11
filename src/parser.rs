@@ -269,12 +269,22 @@ impl<'a> Parser<'a> {
                         class_declaration.super_class = Some(super_descriptor);
                     } else {
                         // `.super` found before `.class`, file is malformed.
-                        return Err(ParseError::SuperBeforeClass {
+                        return Err(ParseError::DirectiveBeforeClass {
                             span: self.current.span,
                         });
                     }
                 }
-                ".method" => {}
+                ".method" => {
+                    let method_declaration: MethodDeclaration<'a> = self.parse_method()?;
+
+                    if let Some(class_declaration) = &mut class {
+                        class_declaration.methods.push(method_declaration);
+                    } else {
+                        return Err(ParseError::DirectiveBeforeClass {
+                            span: self.current.span,
+                        });
+                    }
+                }
                 _ => {
                     return Err(ParseError::Unexpected {
                         expected: TokenKind::Directive,
@@ -344,5 +354,42 @@ mod tests {
 
         assert_eq!(register.span, Span { start: 0, end: 3 });
         assert_eq!(register.number, 12);
+    }
+
+    #[test]
+    fn parse_method() {
+        let src = include_str!("../tests/method.smali");
+        let mut parser = Parser::new(src).expect("Failed to create parser");
+        let file = parser.parse().expect("Failed to parse file");
+
+        assert_eq!(file.class.methods.len(), 1);
+
+        let method = &file.class.methods[0];
+        assert_eq!(method.name.name, "foo");
+        assert_eq!(method.access_modifiers.len(), 1);
+        assert_eq!(method.access_modifiers[0].name, "public");
+        assert_eq!(method.instructions.len(), 1);
+        assert!(matches!(
+            method.instructions[0],
+            Instruction::ReturnVoid { .. }
+        ));
+    }
+
+    #[test]
+    fn parse_method_before_class() {
+        let src = include_str!("../tests/method_before_class.smali");
+        let mut parser = Parser::new(src).expect("Failed to create parser");
+
+        // `.method` before `.class` is malformed: parsing must fail.
+        assert!(parser.parse().is_err());
+    }
+
+    #[test]
+    fn parse_unclosed_method() {
+        let src = include_str!("../tests/unclosed_method.smali");
+        let mut parser = Parser::new(src).expect("Failed to create parser");
+        let result = parser.parse();
+
+        assert!(matches!(result, Err(ParseError::UnclosedMethod { .. })));
     }
 }

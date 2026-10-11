@@ -74,7 +74,7 @@ impl<'a> Parser<'a> {
 
     fn parse_method(&mut self) -> Result<MethodDeclaration<'a>, ParseError> {
         let directive: Token = self.expect(TokenKind::Directive)?;
-        let start_span = directive.span.start;
+        let start_span: usize = directive.span.start;
 
         let mut access_modifiers: Vec<Identifier<'a>> = Vec::new();
 
@@ -109,13 +109,14 @@ impl<'a> Parser<'a> {
         let method_name: Token = self.expect(TokenKind::Identifier)?;
         let method_name_span: Span = method_name.span;
 
-        let mut instructions = Vec::new();
-        let mut end_span = method_name_span.end;
+        let mut instructions: Vec<Instruction<'_>> = Vec::new();
+        let mut end_span: usize = method_name_span.end;
+
+        let mut found_end: bool = false;
 
         while self.current.kind != TokenKind::EndOfFile {
             if self.current.kind == TokenKind::Directive {
-                let text = &self.src[self.current.span.start..self.current.span.end];
-
+                let text: &str = &self.src[self.current.span.start..self.current.span.end];
                 if text == ".end" {
                     // We found the end of the method. We must consume it.
                     self.expect(TokenKind::Directive)?;
@@ -124,11 +125,11 @@ impl<'a> Parser<'a> {
                     // We save the Token to get its span.
                     let end_word: Token = self.expect(TokenKind::Identifier)?;
                     end_span = end_word.span.end;
-
+                    found_end = true;
                     // We found the end: we may exit the loop.
                     break;
                 } else {
-                    // It is another directive interal to the method (example: .registers 2).
+                    // It is another directive internal to the method (example: .registers 2).
                     // For now, we may skip it by consuming the token. We may implement parsing later.
                     self.bump()?;
                     continue;
@@ -138,6 +139,15 @@ impl<'a> Parser<'a> {
             let instruction: Instruction<'_> = self.parse_instruction()?;
             instructions.push(instruction);
         }
+
+        if !found_end {
+            return Err(ParseError::UnclosedMethod {
+                span: Span {
+                    start: start_span,
+                    end: end_span,
+                },
+            });
+        };
 
         let method_declaration: MethodDeclaration<'a> = MethodDeclaration {
             name: Identifier {
@@ -306,8 +316,8 @@ mod tests {
         assert_eq!(class.span, Span { start: 0, end: 6 });
 
         // access modifier "public"
-        assert_eq!(class.access.span, Span { start: 7, end: 13 });
-        assert_eq!(class.access.name, "public");
+        assert_eq!(class.access_modifier.span, Span { start: 7, end: 13 });
+        assert_eq!(class.access_modifier.name, "public");
 
         // class descriptor "Lcom/example/MyClass;"
         assert_eq!(class.name.span, Span { start: 14, end: 35 });

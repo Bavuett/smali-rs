@@ -16,6 +16,9 @@ pub enum ParseError {
         got: TokenKind,
         span: Span,
     },
+    UnclosedMethod {
+        span: Span,
+    },
     SuperBeforeClass {
         span: Span,
     },
